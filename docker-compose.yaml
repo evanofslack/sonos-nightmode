@@ -1,0 +1,11 @@
+services:
+  sonos-nightmode:
+    container_name: sonos-nightmode
+    build:
+      context: .
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - SONOS_NAME=${SONOS_NAME}
+      - NIGHTMODE_ON=${NIGHTMODE_ON}
+      - NIGHTMODE_OFF=${NIGHTMODE_OFF}
