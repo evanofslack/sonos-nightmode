@@ -24,6 +24,8 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
+RUN sudo apt-get install libxml2-dev libxslt1-dev python-lxml
+
 # Upgrade pip
 RUN python -m ensurepip --upgrade && python -m pip install --upgrade pip
 
