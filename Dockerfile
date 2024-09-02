@@ -26,7 +26,7 @@ RUN adduser \
 
 # deps
 RUN apt-get update \
-    && apt-get install -yes --no-install-recommends \
+    && apt-get install --yes --no-install-recommends \
     libxml2-dev libxslt1-dev python-lxml
 
 # Upgrade pip
