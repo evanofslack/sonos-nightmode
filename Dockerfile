@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG PYTHON_VERSION=3.10.4
-FROM python:${PYTHON_VERSION}-slim as base
+FROM python:${PYTHON_VERSION} as base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -24,19 +24,13 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
-# deps
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends \
-    libxml2-dev libxslt1-dev python-lxml
-
-# Upgrade pip
-RUN python -m ensurepip --upgrade && python -m pip install --upgrade pip
-
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
 # Leverage a bind mount to requirements.txt to avoid having to copy them into
 # into this layer.
-RUN --mount=type=cache,target=/root/.cache/pip \
+RUN python -m ensurepip --upgrade \
+    && python -m pip install --upgrade pip \
+    && --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install --use-pep517 -r requirements.txt
 
