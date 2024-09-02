@@ -24,7 +24,10 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
-RUN sudo apt-get install libxml2-dev libxslt1-dev python-lxml
+# deps
+RUN apt-get update \
+    && apt-get install -yes --no-install-recommends \
+    libxml2-dev libxslt1-dev python-lxml
 
 # Upgrade pip
 RUN python -m ensurepip --upgrade && python -m pip install --upgrade pip
