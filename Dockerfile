@@ -25,7 +25,7 @@ RUN adduser \
     appuser
 
 # Upgrade pip
-RUN python -m ensurepip --upgrade
+RUN python -m ensurepip --upgrade && python -m pip install --upgrade pip
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
