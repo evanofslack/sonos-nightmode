@@ -33,7 +33,7 @@ RUN python -m ensurepip --upgrade
 # into this layer.
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
-    python -m pip install --use-pep517 -e -r requirements.txt
+    python -m pip install --use-pep517 -r requirements.txt
 
 # Switch to the non-privileged user to run the application.
 USER appuser
