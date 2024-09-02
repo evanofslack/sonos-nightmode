@@ -9,3 +9,4 @@ services:
       - SONOS_NAME=${SONOS_NAME}
       - NIGHTMODE_ON=${NIGHTMODE_ON}
       - NIGHTMODE_OFF=${NIGHTMODE_OFF}
+      - TZ=America/New_York
