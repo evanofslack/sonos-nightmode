@@ -26,23 +26,15 @@ def config_from_env() -> Config:
 
     nightmode_on_var = "NIGHTMODE_ON"
     nightmode_on = os.getenv(nightmode_on_var)
-    if nightmode_on is None:
-        print(f"could not find env var: {nightmode_on_var}")
 
     nightmode_off_var = "NIGHTMODE_OFF"
     nightmode_off = os.getenv(nightmode_off_var)
-    if nightmode_off is None:
-        print(f"could not find env var: {nightmode_off_var}")
 
     speech_on_var = "SPEECH_ENHANCE_ON"
     speech_enhance_on = os.getenv(speech_on_var)
-    if speech_enhance_on is None:
-        print(f"could not find env var: {speech_on_var}")
 
     speech_off_var = "SPEECH_ENHANCE_OFF"
     speech_enhance_off = os.getenv(speech_off_var)
-    if speech_enhance_off is None:
-        print(f"could not find env var: {speech_off_var}")
 
     config = Config(
         speaker_name=speaker_name,
@@ -79,37 +71,29 @@ def set_speech_enhance(speaker: soco.SoCo, enabled: bool):
 
 def set_schedule(config: Config, speaker: soco.SoCo):
     if config.nightmode_on is not None:
-        print(
-            f"scheduling system {config.speaker_name} nightmode on at {config.nightmode_on}"
-        )
+        print(f"scheduling nightmode on at {config.nightmode_on}")
         schedule.every().day.at(config.nightmode_on).do(
             set_nightmode, speaker=speaker, enabled=True
         )
 
     if config.nightmode_off is not None:
-        print(
-            f"scheduling system {config.speaker_name} nightmode off at {config.nightmode_off}"
-        )
+        print(f"scheduling nightmode off at {config.nightmode_off}")
         schedule.every().day.at(config.nightmode_off).do(
             set_nightmode, speaker=speaker, enabled=False
         )
 
     if config.speech_enhance_on is not None:
-        print(
-            f"scheduling system {config.speaker_name} speech enhance on at {config.speech_enhance_on}"
-        )
+        print(f"scheduling speech enhancement on at {config.speech_enhance_on}")
         schedule.every().day.at(config.speech_enhance_on).do(
             set_speech_enhance, speaker=speaker, enabled=True
         )
 
     if config.speech_enhance_off is not None:
-        print(
-            f"scheduling system {config.speaker_name} speech enhance off at {config.speech_enhance_off}"
-        )
+        print(f"scheduling speech enhancement off at {config.speech_enhance_off}")
         schedule.every().day.at(config.nightmode_on).do(
             set_speech_enhance, speaker=speaker, enabled=False
         )
-    print("scheduling set, waiting for next invocation...")
+    print("scheduling complete, waiting for next invocation...")
 
 
 def main():
