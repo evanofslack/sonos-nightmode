@@ -9,4 +9,6 @@ services:
       - SONOS_NAME=${SONOS_NAME}
       - NIGHTMODE_ON=${NIGHTMODE_ON}
       - NIGHTMODE_OFF=${NIGHTMODE_OFF}
-      - TZ=America/New_York
+      - SPEECH_ENHANCE_ON=${SPEECH_ENHANCE_ON}
+      - SPEECH_ENHANCE_OFF=${SPEECH_ENHANCE_OFF}
+      - TZ=America/New_York # important to set timezone so scheduling is accurate
