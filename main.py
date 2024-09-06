@@ -58,15 +58,20 @@ def find_speaker(speaker_name: str) -> soco.SoCo:
 
 
 def set_nightmode(speaker: soco.SoCo, enabled: bool):
-    print(f"nightmode before: {speaker.night_mode}")
     speaker.night_mode = enabled
-    print(f"nightmode after: {speaker.night_mode}")
+    if enabled:
+        print(f"nightmode enabled")
+    else:
+        print(f"nightmode disabled")
+
 
 
 def set_speech_enhance(speaker: soco.SoCo, enabled: bool):
-    print(f"speech enhanced before: {speaker.dialog_mode}")
     speaker.night_mode = enabled
-    print(f"speech enhanced after: {speaker.dialog_mode}")
+    if enabled:
+        print(f"speech enhancement enabled")
+    else:
+        print(f"speech enhancement disabled")
 
 
 def set_schedule(config: Config, speaker: soco.SoCo):
