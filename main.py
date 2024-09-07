@@ -7,6 +7,7 @@ from typing import Optional
 import dotenv
 import schedule
 import soco
+from loguru import logger
 
 
 @dataclass
@@ -21,7 +22,7 @@ class Config:
 def config_from_env() -> Config:
     speaker_name = os.getenv("SONOS_NAME")
     if speaker_name is None:
-        print(f"could not find env var: SONOS_NAME")
+        logger.error(f"could not find env var: SONOS_NAME")
         sys.exit(1)
 
     nightmode_on_var = "NIGHTMODE_ON"
@@ -49,59 +50,59 @@ def config_from_env() -> Config:
 def find_speaker(speaker_name: str) -> soco.SoCo:
     speaker = soco.discovery.by_name(speaker_name)
     if speaker is None:
-        print(f"could not find speaker: {speaker_name}")
+        logger.error(f"could not find speaker: {speaker_name}")
         sys.exit(1)
-    print(f"successfully found speaker: {speaker_name}")
-    print(f"currently nightmode is: {speaker.night_mode}")
-    print(f"currently speech enhancement is: {speaker.dialog_mode}")
+    logger.info(f"successfully found speaker: {speaker_name}")
+    logger.info(f"currently nightmode is: {speaker.night_mode}")
+    logger.info(f"currently speech enhancement is: {speaker.dialog_mode}")
     return speaker
 
 
 def set_nightmode(speaker: soco.SoCo, enabled: bool):
     speaker.night_mode = enabled
     if enabled:
-        print(f"nightmode enabled")
+        logger.info(f"nightmode enabled")
     else:
-        print(f"nightmode disabled")
-
+        logger.info(f"nightmode disabled")
 
 
 def set_speech_enhance(speaker: soco.SoCo, enabled: bool):
     speaker.night_mode = enabled
     if enabled:
-        print(f"speech enhancement enabled")
+        logger.info(f"speech enhancement enabled")
     else:
-        print(f"speech enhancement disabled")
+        logger.info(f"speech enhancement disabled")
 
 
 def set_schedule(config: Config, speaker: soco.SoCo):
     if config.nightmode_on is not None:
-        print(f"scheduling nightmode on at {config.nightmode_on}")
+        logger.info(f"scheduling nightmode on at {config.nightmode_on}")
         schedule.every().day.at(config.nightmode_on).do(
             set_nightmode, speaker=speaker, enabled=True
         )
 
     if config.nightmode_off is not None:
-        print(f"scheduling nightmode off at {config.nightmode_off}")
+        logger.info(f"scheduling nightmode off at {config.nightmode_off}")
         schedule.every().day.at(config.nightmode_off).do(
             set_nightmode, speaker=speaker, enabled=False
         )
 
     if config.speech_enhance_on is not None:
-        print(f"scheduling speech enhancement on at {config.speech_enhance_on}")
+        logger.info(f"scheduling speech enhancement on at {config.speech_enhance_on}")
         schedule.every().day.at(config.speech_enhance_on).do(
             set_speech_enhance, speaker=speaker, enabled=True
         )
 
     if config.speech_enhance_off is not None:
-        print(f"scheduling speech enhancement off at {config.speech_enhance_off}")
-        schedule.every().day.at(config.nightmode_on).do(
+        logger.info(f"scheduling speech enhancement off at {config.speech_enhance_off}")
+        schedule.every().day.at(config.speech_enhance_off).do(
             set_speech_enhance, speaker=speaker, enabled=False
         )
-    print("scheduling complete, waiting for next invocation...")
+    logger.info("scheduling complete, waiting for next invocation...")
 
 
 def main():
+    logger.add(sys.stdout, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
     dotenv.load_dotenv()
     config = config_from_env()
     speaker = find_speaker(config.speaker_name)
