@@ -30,6 +30,6 @@ services:
 
 ## Compatibility
 
-Currently images are build for amd64, arm64, and arm/v7. The image has been
+Currently images are build for amd64, arm64, arm/v6 and arm/v7. The image has been
 tested and runs on ubuntu and raspberry pi instances. The image currently does
 not run on MacOS.
