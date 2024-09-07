@@ -102,6 +102,7 @@ def set_schedule(config: Config, speaker: soco.SoCo):
 
 
 def main():
+    logger.remove()
     logger.add(sys.stdout, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
     dotenv.load_dotenv()
     config = config_from_env()
