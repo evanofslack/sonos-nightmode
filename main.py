@@ -50,11 +50,19 @@ def config_from_env() -> Config:
 def find_speaker(speaker_name: str) -> soco.SoCo:
     speaker = soco.discovery.by_name(speaker_name)
     if speaker is None:
-        logger.error(f"could not find speaker: {speaker_name}")
+        logger.error(f"could not find speaker '{speaker_name}'")
         sys.exit(1)
-    logger.info(f"successfully found speaker: {speaker_name}")
-    logger.info(f"currently nightmode is: {speaker.night_mode}")
-    logger.info(f"currently speech enhancement is: {speaker.dialog_mode}")
+    logger.info(f"successfully found speaker '{speaker_name}'")
+
+    if speaker.night_mode:
+        logger.info(f"currently nightmode is enabled")
+    else:
+        logger.info(f"currently nightmode is disabled")
+
+    if speaker.dialog_mode:
+        logger.info(f"currently speech enhancement is enabled")
+    else:
+        logger.info(f"currently speech enhancement is disabled")
     return speaker
 
 
@@ -76,25 +84,25 @@ def set_speech_enhance(speaker: soco.SoCo, enabled: bool):
 
 def set_schedule(config: Config, speaker: soco.SoCo):
     if config.nightmode_on is not None:
-        logger.info(f"scheduling nightmode on at {config.nightmode_on}")
+        logger.info(f"scheduling nightmode enabled at {config.nightmode_on}")
         schedule.every().day.at(config.nightmode_on).do(
             set_nightmode, speaker=speaker, enabled=True
         )
 
     if config.nightmode_off is not None:
-        logger.info(f"scheduling nightmode off at {config.nightmode_off}")
+        logger.info(f"scheduling nightmode disabled at {config.nightmode_off}")
         schedule.every().day.at(config.nightmode_off).do(
             set_nightmode, speaker=speaker, enabled=False
         )
 
     if config.speech_enhance_on is not None:
-        logger.info(f"scheduling speech enhancement on at {config.speech_enhance_on}")
+        logger.info(f"scheduling speech enhancement enabled at {config.speech_enhance_on}")
         schedule.every().day.at(config.speech_enhance_on).do(
             set_speech_enhance, speaker=speaker, enabled=True
         )
 
     if config.speech_enhance_off is not None:
-        logger.info(f"scheduling speech enhancement off at {config.speech_enhance_off}")
+        logger.info(f"scheduling speech enhancement disabled at {config.speech_enhance_off}")
         schedule.every().day.at(config.speech_enhance_off).do(
             set_speech_enhance, speaker=speaker, enabled=False
         )
