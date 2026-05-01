@@ -7,6 +7,7 @@ from typing import Optional
 import dotenv
 import schedule
 import soco
+from requests import RequestException
 from loguru import logger
 
 
@@ -66,45 +67,85 @@ def find_speaker(speaker_name: str) -> soco.SoCo:
     return speaker
 
 
-def set_nightmode(speaker: soco.SoCo, enabled: bool):
+def _set_nightmode(speaker: soco.SoCo, enabled: bool):
+    if speaker.night_mode == enabled:
+        logger.info(f"nightmode already {'enabled' if enabled else 'disabled'}, skipping")
+        return
     speaker.night_mode = enabled
-    if enabled:
-        logger.info(f"nightmode enabled")
-    else:
-        logger.info(f"nightmode disabled")
+    logger.info(f"nightmode {'enabled' if enabled else 'disabled'}")
 
 
-def set_speech_enhance(speaker: soco.SoCo, enabled: bool):
-    speaker.night_mode = enabled
-    if enabled:
-        logger.info(f"speech enhancement enabled")
-    else:
-        logger.info(f"speech enhancement disabled")
+def _set_speech_enhance(speaker: soco.SoCo, enabled: bool):
+    if speaker.dialog_mode == enabled:
+        logger.info(
+            f"speech enhancement already {'enabled' if enabled else 'disabled'}, skipping"
+        )
+        return
+    speaker.dialog_mode = enabled
+    logger.info(f"speech enhancement {'enabled' if enabled else 'disabled'}")
+
+
+def run_with_retry(
+    speaker_name: str, speaker: soco.SoCo, action: str, enabled: bool, retries: int = 2
+) -> soco.SoCo:
+    current_speaker = speaker
+    for attempt in range(1, retries + 2):
+        try:
+            if action == "nightmode":
+                _set_nightmode(current_speaker, enabled)
+            elif action == "speech_enhance":
+                _set_speech_enhance(current_speaker, enabled)
+            else:
+                logger.error(f"unknown action: {action}")
+            return current_speaker
+        except (RequestException, OSError, soco.exceptions.SoCoException) as err:
+            logger.error(
+                f"{action} update failed (attempt {attempt}/{retries + 1}): {err}"
+            )
+            if attempt > retries:
+                break
+            time.sleep(2)
+            current_speaker = find_speaker(speaker_name)
+    return current_speaker
+
+
+def make_job(speaker_name: str, speaker_holder: dict, action: str, enabled: bool):
+    def _job():
+        speaker_holder["speaker"] = run_with_retry(
+            speaker_name=speaker_name,
+            speaker=speaker_holder["speaker"],
+            action=action,
+            enabled=enabled,
+        )
+
+    return _job
 
 
 def set_schedule(config: Config, speaker: soco.SoCo):
+    speaker_holder = {"speaker": speaker}
+
     if config.nightmode_on is not None:
         logger.info(f"scheduling nightmode enabled at {config.nightmode_on}")
         schedule.every().day.at(config.nightmode_on).do(
-            set_nightmode, speaker=speaker, enabled=True
+            make_job(config.speaker_name, speaker_holder, "nightmode", True)
         )
 
     if config.nightmode_off is not None:
         logger.info(f"scheduling nightmode disabled at {config.nightmode_off}")
         schedule.every().day.at(config.nightmode_off).do(
-            set_nightmode, speaker=speaker, enabled=False
+            make_job(config.speaker_name, speaker_holder, "nightmode", False)
         )
 
     if config.speech_enhance_on is not None:
         logger.info(f"scheduling speech enhancement enabled at {config.speech_enhance_on}")
         schedule.every().day.at(config.speech_enhance_on).do(
-            set_speech_enhance, speaker=speaker, enabled=True
+            make_job(config.speaker_name, speaker_holder, "speech_enhance", True)
         )
 
     if config.speech_enhance_off is not None:
         logger.info(f"scheduling speech enhancement disabled at {config.speech_enhance_off}")
         schedule.every().day.at(config.speech_enhance_off).do(
-            set_speech_enhance, speaker=speaker, enabled=False
+            make_job(config.speaker_name, speaker_holder, "speech_enhance", False)
         )
     logger.info("scheduling complete, waiting for next invocation...")
 
